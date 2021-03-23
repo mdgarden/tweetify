@@ -12,9 +12,9 @@ load_dotenv(find_dotenv())
 # Spotify scopes:
 #   user-read-currently-playing
 #   user-read-recently-played
-SPOTIFY_ID = os.getenv("SPOTIFY_ID")
-SPOTIFY_SECRET = os.getenv("SPOTIFY_SECRET")
-SPOTIFY_REFRESH_TOKEN = os.getenv("SPOTIFY_REFRESH_TOKEN")
+SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_ID")
+SPOTIFY_SECRET_ID = os.getenv("SPOTIFY_SECRET")
+SPOTIFY_REFRESH_TOKEN = os.getenv("SPOTIFY_REFRESH")
 
 REFRESH_TOKEN_URL = "https://accounts.spotify.com/api/token"
 NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing"
@@ -24,8 +24,9 @@ RECENTLY_PLAYING_URL = (
 
 app = Flask(__name__)
 
+
 def getAuth():
-    return b64encode(f"{SPOTIFY_ID}:{SPOTIFY_SECRET}".encode()).decode(
+    return b64encode(f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_SECRET_ID}".encode()).decode(
         "ascii"
     )
 
@@ -47,6 +48,16 @@ def refreshToken():
         raise KeyError(str(response.json()))
 
 
+def recentlyPlayed():
+    token = refreshToken()
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(RECENTLY_PLAYING_URL, headers=headers)
+
+    if response.status_code == 204:
+        return {}
+    return response.json()
+
+
 def nowPlaying():
     token = refreshToken()
     headers = {"Authorization": f"Bearer {token}"}
@@ -56,16 +67,15 @@ def nowPlaying():
         return {}
     return response.json()
 
+
+
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def catch_all(path):
     data = nowPlaying()
-
-    resp = Response(svg, mimetype="image/svg+xml")
-    resp.headers["Cache-Control"] = "s-maxage=1"
-
-    return resp
+    current_playing = data["item"]["name"]
+    return current_playing
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run('0.0.0.0', port=5000, debug=True)
