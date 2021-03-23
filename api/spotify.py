@@ -73,8 +73,10 @@ def nowPlaying():
 @app.route("/<path:path>")
 def catch_all(path):
     data = nowPlaying()
-    current_playing = data["item"]["name"]
-    return current_playing
+    np_title = data["item"]["name"]
+    np_artist = data["item"]["artists"][0]["name"]
+    now_playing = '#np 🎵 ' + np_title + ' - ' + np_artist
+    return now_playing
 
 
 if __name__ == "__main__":
