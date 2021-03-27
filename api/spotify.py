@@ -22,6 +22,10 @@ RECENTLY_PLAYING_URL = (
     "https://api.spotify.com/v1/me/player/recently-played?limit=10"
 )
 
+# Twitter
+# POST account/update_profile
+
+
 app = Flask(__name__)
 
 
